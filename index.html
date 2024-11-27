@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>dc.js ローディング</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: black; /* 背景を黒に */
+            color: white; /* テキストを白に */
+        }
+        #progressContainer {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin: 20px auto;
+            width: 400px;
+        }
+        .progress-block {
+            width: 36px;
+            height: 30px;
+            border: 1px solid #666666;
+            background-color: #333333;
+            transition: background-color 0.5s ease;
+        }
+        .progress-block.active {
+            background-color: #ffff00;
+        }
+        #status {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="status">Downloading...</div>
+    <div id="progressContainer">
+        <div class="progress-block"></div>
+        <div class="progress-block"></div>
+        <div class="progress-block"></div>
+        <div class="progress-block"></div>
+        <div class="progress-block"></div>
+        <div class="progress-block"></div>
+        <div class="progress-block"></div>
+        <div class="progress-block"></div>
+        <div class="progress-block"></div>
+        <div class="progress-block"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const progressBlocks = document.querySelectorAll('.progress-block');
+            const statusElement = document.getElementById('status');
+
+            function simulateDownload() {
+                const totalBlocks = progressBlocks.length;
+                let loadedBlocks = 0;
+
+                const xhr = new XMLHttpRequest();
+                xhr.open('GET', 'dc.js', true);
+
+                xhr.onprogress = (event) => {
+                    if (event.lengthComputable) {
+                        const percentComplete = (event.loaded / event.total) * 100;
+                        const blocksToFill = Math.floor((percentComplete / 100) * totalBlocks);
+
+                        // プログレスバーを更新
+                        for (let i = 0; i < blocksToFill; i++) {
+                            if (!progressBlocks[i].classList.contains('active')) {
+                                progressBlocks[i].classList.add('active');
+                                loadedBlocks++;
+                            }
+                        }
+
+                        statusElement.textContent = `Downloading... ${Math.round(percentComplete)}%`;
+                    }
+                };
+
+                xhr.onload = () => {
+                    // 全ブロックをアクティブにする
+                    progressBlocks.forEach(block => block.classList.add('active'));
+                    statusElement.textContent = 'Download complete';
+                };
+
+                xhr.onerror = () => {
+                    statusElement.textContent = 'Download error';
+                };
+
+                xhr.send();
+            }
+
+            simulateDownload();
+        });
+    </script>
+</body>
+</html>
